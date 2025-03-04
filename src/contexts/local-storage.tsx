@@ -10,11 +10,15 @@ import {
 type LocalStorageValue = {
   savedState: string[];
   updateEndingState: (key: string, state: boolean) => void;
+  overrideState: (state: string[]) => void;
+  exportString: string;
 };
 
 const LocalStorageContext = createContext<LocalStorageValue>({
   savedState: [],
   updateEndingState: () => {},
+  overrideState: () => {},
+  exportString: "",
 });
 
 type LocalStorageProviderProps = PropsWithChildren<object>;
@@ -48,12 +52,21 @@ export function LocalStorageProvider({ children }: LocalStorageProviderProps) {
     });
   };
 
+  const overrideState = (state: string[]) => {
+    setSavedState(state);
+    localStorage.setItem("saved", JSON.stringify(state));
+  };
+
+  const exportString = btoa(JSON.stringify(savedState));
+
   const value = useMemo(
     () => ({
       savedState,
       updateEndingState,
+      overrideState,
+      exportString,
     }),
-    [savedState]
+    [savedState, exportString]
   );
 
   return (
@@ -63,6 +76,7 @@ export function LocalStorageProvider({ children }: LocalStorageProviderProps) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useLocalStorage() {
   const context = useContext(LocalStorageContext);
   if (!context) {

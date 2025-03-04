@@ -4,16 +4,29 @@ import { Checkbox } from "./checkbox";
 type ItemProps = {
   title: string;
   url?: string;
+  isBucketList?: boolean;
+  hasBucketEnding?: boolean;
 };
 
-export const Item = ({ title, url }: ItemProps) => {
+export const Item = ({
+  title,
+  url,
+  isBucketList,
+  hasBucketEnding,
+}: ItemProps) => {
   const { savedState, updateEndingState } = useLocalStorage();
 
   if (!url) {
     return null;
   }
 
-  const isChecked = savedState.includes(url);
+  if (isBucketList && !hasBucketEnding) {
+    return null;
+  }
+
+  const prefix = isBucketList ? "BL_" : "";
+
+  const isChecked = savedState.includes(prefix + url);
 
   return (
     <div className="flex items-center gap-4">
@@ -22,7 +35,7 @@ export const Item = ({ title, url }: ItemProps) => {
         value={url}
         checked={isChecked}
         onCheckedChange={(state) => {
-          updateEndingState(url, !!state);
+          updateEndingState(prefix + url, !!state);
         }}
       />
 
